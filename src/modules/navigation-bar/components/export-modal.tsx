@@ -152,6 +152,23 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                     },
                     next_node_id: getNextNodeId(node.id),
                 };
+            } else if (node.type === BuilderNode.LOCATION) {
+                compiledNodes[node.id] = {
+                    type: "location_message",
+                    whatsapp_payload: {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: "{{recipient_phone_number}}",
+                        type: "location",
+                        location: {
+                            latitude: Number((node.data as any).latitude) || 0,
+                            longitude: Number((node.data as any).longitude) || 0,
+                            name: (node.data as any).name || "",
+                            address: (node.data as any).address || "",
+                        },
+                    },
+                    next_node_id: getNextNodeId(node.id),
+                };
             } else if (node.type === BuilderNode.CONDITIONAL_PATH) {
                 compiledNodes[node.id] = {
                     type: "conditional_path",
@@ -284,7 +301,8 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                 || n.type === BuilderNode.IMAGE
                 || n.type === BuilderNode.VIDEO
                 || n.type === BuilderNode.CONTACT
-                || n.type === BuilderNode.INTERACTIVE,
+                || n.type === BuilderNode.INTERACTIVE
+                || n.type === BuilderNode.LOCATION,
         );
     }, [nodes]);
 
@@ -444,6 +462,19 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                             : [],
                     },
                 ],
+            };
+        } else if (node.type === BuilderNode.LOCATION) {
+            payload = {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: "{{recipient_phone_number}}",
+                type: "location",
+                location: {
+                    latitude: Number((node.data as any).latitude) || 0,
+                    longitude: Number((node.data as any).longitude) || 0,
+                    name: (node.data as any).name || "",
+                    address: (node.data as any).address || "",
+                },
             };
         }
 

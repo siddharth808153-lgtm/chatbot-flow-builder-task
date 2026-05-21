@@ -17,7 +17,7 @@ export function SidebarModule() {
                 <MobileSidebarFragment activePanel={activePanel} setActivePanel={setActivePanel} />
             </Switch.Case>
             <Switch.Default>
-                <DesktopSidebarFragment isMobileView={isMobileView} activePanel={activePanel} setActivePanel={setActivePanel} />
+                <DesktopSidebarFragment activePanel={activePanel} setActivePanel={setActivePanel} />
             </Switch.Default>
         </Switch>
     );

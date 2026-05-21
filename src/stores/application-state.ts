@@ -51,8 +51,12 @@ const applicationStateInstance = defineStoreInstance<State, Actions>((init) => {
                     state.sidebar.active = panel;
                 }),
                 showNodePropertiesOf: node => set((state) => {
-                    state.sidebar.active = "node-properties";
-                    state.sidebar.panels.nodeProperties.selectedNode = node;
+                    if (state.sidebar.active === "node-properties" && state.sidebar.panels.nodeProperties.selectedNode?.id === node.id) {
+                        state.sidebar.active = "none";
+                    } else {
+                        state.sidebar.active = "node-properties";
+                        state.sidebar.panels.nodeProperties.selectedNode = node;
+                    }
                 }),
                 panels: {
                     nodeProperties: {
@@ -72,7 +76,7 @@ const applicationStateInstance = defineStoreInstance<State, Actions>((init) => {
         mobile: false,
     },
     sidebar: {
-        active: "none",
+        active: "available-nodes",
         panels: {
             nodeProperties: {
                 selectedNode: null,

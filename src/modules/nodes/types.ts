@@ -10,6 +10,7 @@ export enum BuilderNode {
     CONTACT = "contact",
     INTERACTIVE = "interactive",
     HANDOFF = "handoff",
+    LOCATION = "location",
 }
 
 export type BuilderNodeType = `${BuilderNode}`;
