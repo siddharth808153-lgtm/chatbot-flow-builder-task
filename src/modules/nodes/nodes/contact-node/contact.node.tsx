@@ -2,28 +2,20 @@ import { type Node, type NodeProps, Position } from "@xyflow/react";
 import { nanoid } from "nanoid";
 import { memo, useCallback, useMemo, useState } from "react";
 
+import type { ContactNodeData } from "./types";
+
 import CustomHandle from "~/modules/flow-builder/components/handles/custom-handle";
 import { useDeleteNode } from "~/modules/flow-builder/hooks/use-delete-node";
-import { type BaseNodeData, BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
+import { BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
 import { getNodeDetail } from "~/modules/nodes/utils";
 import ContactNodePropertyPanel from "~/modules/sidebar/panels/node-properties/property-panels/contact-node-property-panel";
 import { useApplicationState } from "~/stores/application-state";
 
 import { cn } from "~@/utils/cn";
 
-export interface ContactNodeData extends BaseNodeData {
-    formattedName: string;
-    firstName: string;
-    lastName: string;
-    phone: string;
-    waId: string;
-    company?: string;
-    title?: string;
-    email?: string;
-    url?: string;
-}
-
 const NODE_TYPE = BuilderNode.CONTACT;
+
+export type { ContactNodeData };
 
 type ContactNodeProps = NodeProps<Node<ContactNodeData, typeof NODE_TYPE>>;
 

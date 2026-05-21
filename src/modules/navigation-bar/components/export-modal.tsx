@@ -161,6 +161,106 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                         next_node_id: getNextNodeId(node.id, p.id),
                     })),
                 };
+            } else if (node.type === BuilderNode.INTERACTIVE) {
+                const interactiveType = (node.data as any).interactiveType || "button";
+                let whatsappPayload: any = {};
+
+                if (interactiveType === "button") {
+                    whatsappPayload = {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: "{{recipient_phone_number}}",
+                        type: "interactive",
+                        interactive: {
+                            type: "button",
+                            body: {
+                                text: (node.data as any).bodyText || "",
+                            },
+                            action: {
+                                buttons: (((node.data as any).buttons as any[]) || []).map(b => ({
+                                    type: "reply",
+                                    reply: {
+                                        id: b.id,
+                                        title: b.title || "",
+                                    },
+                                })),
+                            },
+                        },
+                    };
+                } else if (interactiveType === "list") {
+                    whatsappPayload = {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: "{{recipient_phone_number}}",
+                        type: "interactive",
+                        interactive: {
+                            type: "list",
+                            body: {
+                                text: (node.data as any).bodyText || "",
+                            },
+                            action: {
+                                button: (node.data as any).listButtonText || "View Options",
+                                sections: [
+                                    {
+                                        title: "Options Menu",
+                                        rows: (((node.data as any).listRows as any[]) || []).map(r => ({
+                                            id: r.id,
+                                            title: r.title || "",
+                                            description: r.description || undefined,
+                                        })),
+                                    },
+                                ],
+                            },
+                        },
+                    };
+                } else if (interactiveType === "cta_url") {
+                    whatsappPayload = {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: "{{recipient_phone_number}}",
+                        type: "interactive",
+                        interactive: {
+                            type: "cta_url",
+                            body: {
+                                text: (node.data as any).bodyText || "",
+                            },
+                            action: {
+                                name: "cta_url",
+                                parameters: {
+                                    display_text: (node.data as any).ctaText || "Open Page",
+                                    url: (node.data as any).ctaUrl || "",
+                                },
+                            },
+                        },
+                    };
+                }
+
+                compiledNodes[node.id] = {
+                    type: "interactive_message",
+                    interactive_type: interactiveType,
+                    whatsapp_payload: whatsappPayload,
+                    paths: interactiveType === "cta_url"
+                        ? undefined
+                        : (interactiveType === "button"
+                                ? (((node.data as any).buttons as any[]) || []).map(b => ({
+                                        reply_id: b.id,
+                                        reply_title: b.title || "",
+                                        next_node_id: getNextNodeId(node.id, b.id),
+                                    }))
+                                : (((node.data as any).listRows as any[]) || []).map(r => ({
+                                        reply_id: r.id,
+                                        reply_title: r.title || "",
+                                        next_node_id: getNextNodeId(node.id, r.id),
+                                    }))),
+                    next_node_id: interactiveType === "cta_url" ? getNextNodeId(node.id) : undefined,
+                };
+            } else if (node.type === BuilderNode.HANDOFF) {
+                compiledNodes[node.id] = {
+                    type: "human_handoff",
+                    handoff_destination: (node.data as any).destination || "custom_webhook",
+                    handoff_message: (node.data as any).message || "Connecting you to a live agent. Please hold for a moment.",
+                    session_mode_transition: "human_handoff",
+                };
             }
         });
 
@@ -183,7 +283,8 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                 n.type === BuilderNode.TEXT_MESSAGE
                 || n.type === BuilderNode.IMAGE
                 || n.type === BuilderNode.VIDEO
-                || n.type === BuilderNode.CONTACT,
+                || n.type === BuilderNode.CONTACT
+                || n.type === BuilderNode.INTERACTIVE,
         );
     }, [nodes]);
 
@@ -211,6 +312,69 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                 text: {
                     body: (node.data as any).message || "",
                 },
+            };
+        } else if (node.type === BuilderNode.INTERACTIVE) {
+            const interactiveType = (node.data as any).interactiveType || "button";
+            let interactivePayload: any = {};
+
+            if (interactiveType === "button") {
+                interactivePayload = {
+                    type: "button",
+                    body: {
+                        text: (node.data as any).bodyText || "",
+                    },
+                    action: {
+                        buttons: (((node.data as any).buttons as any[]) || []).map(b => ({
+                            type: "reply",
+                            reply: {
+                                id: b.id,
+                                title: b.title || "",
+                            },
+                        })),
+                    },
+                };
+            } else if (interactiveType === "list") {
+                interactivePayload = {
+                    type: "list",
+                    body: {
+                        text: (node.data as any).bodyText || "",
+                    },
+                    action: {
+                        button: (node.data as any).listButtonText || "View Options",
+                        sections: [
+                            {
+                                title: "Options Menu",
+                                rows: (((node.data as any).listRows as any[]) || []).map(r => ({
+                                    id: r.id,
+                                    title: r.title || "",
+                                    description: r.description || undefined,
+                                })),
+                            },
+                        ],
+                    },
+                };
+            } else if (interactiveType === "cta_url") {
+                interactivePayload = {
+                    type: "cta_url",
+                    body: {
+                        text: (node.data as any).bodyText || "",
+                    },
+                    action: {
+                        name: "cta_url",
+                        parameters: {
+                            display_text: (node.data as any).ctaText || "Open Page",
+                            url: (node.data as any).ctaUrl || "",
+                        },
+                    },
+                };
+            }
+
+            payload = {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: "{{recipient_phone_number}}",
+                type: "interactive",
+                interactive: interactivePayload,
             };
         } else if (node.type === BuilderNode.IMAGE) {
             payload = {

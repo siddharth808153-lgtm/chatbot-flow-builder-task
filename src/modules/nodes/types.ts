@@ -8,6 +8,8 @@ export enum BuilderNode {
     IMAGE = "image",
     VIDEO = "video",
     CONTACT = "contact",
+    INTERACTIVE = "interactive",
+    HANDOFF = "handoff",
 }
 
 export type BuilderNodeType = `${BuilderNode}`;

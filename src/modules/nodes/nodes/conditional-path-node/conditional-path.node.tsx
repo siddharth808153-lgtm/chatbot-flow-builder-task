@@ -4,35 +4,54 @@ import { produce } from "immer";
 import { nanoid } from "nanoid";
 import { memo, useCallback, useMemo, useState } from "react";
 
+import type { ConditionalPathNodeData } from "./types";
+
 import CustomHandle from "~/modules/flow-builder/components/handles/custom-handle";
 import { useDeleteNode } from "~/modules/flow-builder/hooks/use-delete-node";
 import { ConditionDropdownSelector } from "~/modules/nodes/nodes/conditional-path-node/components/condition-dropdown-selector";
 import { NodePath } from "~/modules/nodes/nodes/conditional-path-node/components/node-path";
-import { type BaseNodeData, BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
+import { BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
 import { getNodeDetail } from "~/modules/nodes/utils";
+import ConditionalPathPropertyPanel from "~/modules/sidebar/panels/node-properties/property-panels/conditional-path-property-panel";
 
 import { cn } from "~@/utils/cn";
 
-const caseList = [
-    { id: nanoid(), value: "Allowed" },
-    { id: nanoid(), value: "Denied" },
-    { id: nanoid(), value: "Pending" },
-    { id: nanoid(), value: "Approved" },
-    { id: nanoid(), value: "Rejected" },
-    { id: nanoid(), value: "Cancelled" },
-    { id: nanoid(), value: "Completed" },
-    { id: nanoid(), value: "Failed" },
-];
+const conditionCases: Record<string, { id: string; value: string }[]> = {
+    msg_type: [
+        { id: "type_text", value: "Text Message" },
+        { id: "type_image", value: "Image Attachment" },
+        { id: "type_video", value: "Video Attachment" },
+        { id: "type_document", value: "Document Attachment" },
+        { id: "type_location", value: "Location Share" },
+        { id: "type_contact", value: "Contact Card" },
+    ],
+    btn_click: [
+        { id: "btn_yes", value: "Button 'Yes' Clicked" },
+        { id: "btn_no", value: "Button 'No' Clicked" },
+        { id: "btn_option_a", value: "Quick Reply: Option A" },
+        { id: "btn_option_b", value: "Quick Reply: Option B" },
+    ],
+    keyword: [
+        { id: "kw_help", value: "Contains 'help' or 'support'" },
+        { id: "kw_start", value: "Matches 'start' or 'menu'" },
+        { id: "kw_pricing", value: "Contains 'price' or 'pricing'" },
+        { id: "kw_agent", value: "Matches 'agent' or 'talk to human'" },
+    ],
+    opt_in: [
+        { id: "opt_subscribed", value: "Opt-in / Subscribed" },
+        { id: "opt_unsubscribed", value: "Opt-out / Unsubscribed" },
+    ],
+    order_status: [
+        { id: "status_paid", value: "Payment: Paid" },
+        { id: "status_pending", value: "Payment: Pending" },
+        { id: "status_failed", value: "Payment: Failed" },
+        { id: "status_refunded", value: "Payment: Refunded" },
+    ],
+};
 
 const NODE_TYPE = BuilderNode.CONDITIONAL_PATH;
 
-export interface ConditionalPathNodeData extends BaseNodeData {
-    condition: {
-        id: string;
-        condition: string;
-    } | null;
-    paths: { id: string; case: { id: string; value: string } }[];
-}
+export type { ConditionalPathNodeData };
 
 type ConditionalPathNodeProps = NodeProps<Node<ConditionalPathNodeData, typeof NODE_TYPE>>;
 
@@ -44,21 +63,31 @@ export function ConditionalPathNode({ id, isConnectable, selected, data }: Condi
     const { setNodes, setEdges } = useReactFlow();
     const deleteNode = useDeleteNode();
 
+    const currentConditionId = data.condition?.id || "";
+
+    const activeCaseList = useMemo(() => {
+        if (!currentConditionId) return [];
+        return conditionCases[currentConditionId] || [];
+    }, [currentConditionId]);
+
     const onConditionChange = useCallback(
         (value: { id: string; condition: string } | null) => {
             setNodes(nodes => produce(nodes, (draft) => {
                 const node = draft.find(n => n.id === id);
 
-                if (node)
+                if (node) {
                     node.data.condition = value;
+                    node.data.paths = [];
+                }
             }));
+            setEdges(edges => edges.filter(edge => edge.source !== id));
         },
-        [id, setNodes],
+        [id, setNodes, setEdges],
     );
 
-    const filteredCaseList = useMemo<Omit<ConditionalPathNodeData["paths"][number], "id">["case"][]>(() => {
-        return caseList.filter(c => !data.paths.some(p => p.case.value === c.value));
-    }, [data.paths]);
+    const filteredCaseList = useMemo(() => {
+        return activeCaseList.filter(c => !data.paths.some(p => p.case.value === c.value));
+    }, [activeCaseList, data.paths]);
 
     const addNodePath = useCallback(
         (path: { id: string; value: string }) => {
@@ -214,10 +243,11 @@ export function ConditionalPathNode({ id, isConnectable, selected, data }: Condi
                 </div>
 
                 <div className="px-4 py-2">
-                    <div className="text-xs text-light-900/50">
-                        This is a dummy conditional path node. Has no functionality for matching conditions.
+                    <div className="text-[10px] text-purple-400/80 leading-snug italic">
+                        {data.condition
+                            ? `Routes flow dynamically based on: ${data.condition.condition}.`
+                            : "Select a condition to configure message routing rules."}
                     </div>
-
                 </div>
 
                 <div className="overflow-clip rounded-b-xl bg-dark-300/30 px-4 py-2 text-xs text-light-900/50">
@@ -237,6 +267,7 @@ export function ConditionalPathNode({ id, isConnectable, selected, data }: Condi
 export const metadata: RegisterNodeMetadata<ConditionalPathNodeData> = {
     type: NODE_TYPE,
     node: memo(ConditionalPathNode),
+    propertyPanel: ConditionalPathPropertyPanel,
     detail: {
         icon: "i-mynaui:git-branch",
         title: "Conditional Path",

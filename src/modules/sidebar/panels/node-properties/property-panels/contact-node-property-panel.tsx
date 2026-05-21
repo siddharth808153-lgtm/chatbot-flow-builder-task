@@ -1,4 +1,4 @@
-import type { ContactNodeData } from "~/modules/nodes/nodes/contact-node/contact.node";
+import type { ContactNodeData } from "~/modules/nodes/nodes/contact-node/types";
 import type { BuilderNodeType } from "~/modules/nodes/types";
 
 type ContactNodePropertyPanelProps = Readonly<{

@@ -1,14 +1,14 @@
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { nanoid } from "nanoid";
 
 import { cn } from "~@/utils/cn";
 
-const conditionList = [
-    { id: nanoid(), condition: "User ordered a product" },
-    { id: nanoid(), condition: "User added a product to cart" },
-    { id: nanoid(), condition: "User visited a page" },
-    { id: nanoid(), condition: "User clicked a button" },
-    { id: nanoid(), condition: "User submitted a form data" },
+// eslint-disable-next-line react-refresh/only-export-components
+export const conditionList = [
+    { id: "msg_type", condition: "Incoming Message Type" },
+    { id: "btn_click", condition: "Button Payload / Click" },
+    { id: "keyword", condition: "Text Message Matches Keyword" },
+    { id: "opt_in", condition: "Opt-in / Subscription Status" },
+    { id: "order_status", condition: "Order / Purchase Status" },
 ];
 
 type ConditionDropdownSelectorProps = Readonly<{
