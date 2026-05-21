@@ -5,6 +5,7 @@ export enum BuilderNode {
     END = "end",
     TEXT_MESSAGE = "text-message",
     CONDITIONAL_PATH = "conditional-path",
+    IMAGE = "image",
 }
 
 export type BuilderNodeType = `${BuilderNode}`;
