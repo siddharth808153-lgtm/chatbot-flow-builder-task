@@ -1,9 +1,13 @@
+import { useState } from "react";
 import { toast } from "sonner";
+import { useReactFlow, getConnectedEdges, type Node } from "@xyflow/react";
 
 import { useFlowValidator } from "~/modules/flow-builder/hooks/use-flow-validator";
 import { SocialButtonLink } from "~/modules/navigation-bar/components/social-button-link";
 import { useApplicationState } from "~/stores/application-state";
 import { trackSocialLinkClick } from "~/utils/ga4";
+import { BuilderNode } from "~/modules/nodes/types";
+import { ExportModal } from "~/modules/navigation-bar/components/export-modal";
 
 import { Switch } from "~@/components/generics/switch-case";
 import { Whenever } from "~@/components/generics/whenever";
@@ -11,16 +15,68 @@ import { cn } from "~@/utils/cn";
 
 export function NavigationBarModule() {
     const [isMobileView] = useApplicationState(s => [s.view.mobile]);
+    const { getNodes, getEdges } = useReactFlow();
+
+    const [isExportOpen, setIsExportOpen] = useState(false);
+    const [isExportValidating, setIsExportValidating] = useState(false);
 
     const [isValidating, validateFlow] = useFlowValidator((isValid) => {
         if (isValid)
-            toast.success("Flow is valid", { description: "You can now proceed to the next step", dismissible: true });
+            toast.success("Flow is valid", { description: "You can now proceed to save or export this flow", dismissible: true });
         else
             toast.error("Flow is invalid", { description: "Please check if the flow is complete and has no lone nodes" });
     });
 
+    const handleExportClick = async () => {
+        setIsExportValidating(true);
+        // Add visual validation feedback delay
+        await new Promise(resolve => setTimeout(resolve, 400));
+        
+        const nodes = getNodes();
+        const edges = getEdges();
+        const connectedEdges = getConnectedEdges(nodes, edges);
+
+        let isStartConnected = false;
+        let isEndConnected = false;
+        const nodesWithEmptyTarget: Node[] = [];
+
+        for (const node of nodes) {
+            const outgoingEdges = connectedEdges.filter(edge => edge.source === node.id);
+            const incomingEdges = connectedEdges.filter(edge => edge.target === node.id);
+
+            if (node.type === BuilderNode.START) {
+                isStartConnected = outgoingEdges.length >= 1;
+            } else if (node.type === BuilderNode.END) {
+                isEndConnected = incomingEdges.length === 1;
+            }
+
+            // Lone node check (excluding the start and end nodes specifically)
+            const isLone = node.type === BuilderNode.START
+                ? outgoingEdges.length === 0
+                : incomingEdges.length === 0;
+
+            if (isLone) {
+                nodesWithEmptyTarget.push(node);
+            }
+        }
+
+        const hasAnyLoneNode = nodesWithEmptyTarget.length > 0;
+        const isFlowComplete = isStartConnected && isEndConnected && !hasAnyLoneNode;
+
+        setIsExportValidating(false);
+
+        if (isFlowComplete) {
+            setIsExportOpen(true);
+        } else {
+            toast.error("Flow is invalid", { 
+                description: "Cannot export. Please check if the flow is complete and has no lone nodes.",
+                dismissible: true
+            });
+        }
+    };
+
     return (
-        <div className="relative shrink-0 bg-dark-700 px-1.5 py-2">
+        <div className="relative shrink-0 bg-dark-700 px-1.5 py-2 border-b border-dark-300">
             <div className="absolute inset-0">
                 <div className="absolute h-full w-4/12 from-teal-900/20 to-transparent bg-gradient-to-r <md:(from-teal-900/50)" />
             </div>
@@ -46,10 +102,11 @@ export function NavigationBarModule() {
 
                 <Whenever condition={isMobileView} not>
                     <div className="flex items-center justify-end gap-x-2">
+                        {/* Validate Button */}
                         <button
                             type="button"
                             className={cn(
-                                "h-full flex items-center justify-center outline-none gap-x-2 border border-dark-300 rounded-lg bg-dark-300/50 px-3 text-sm transition active:(bg-dark-400) hover:(bg-dark-200)",
+                                "h-full flex items-center justify-center outline-none gap-x-2 border border-dark-300 rounded-lg bg-dark-300/50 px-3 py-1.5 text-sm transition active:(bg-dark-400) hover:(bg-dark-200)",
                                 isValidating && "cursor-not-allowed op-50 pointer-events-none",
                             )}
                             onClick={() => validateFlow()}
@@ -67,7 +124,29 @@ export function NavigationBarModule() {
                             </span>
                         </button>
 
-                        <div className="h-4 w-px bg-dark-300" />
+                        {/* WhatsApp Save & Export Button */}
+                        <button
+                            type="button"
+                            className={cn(
+                                "h-full flex items-center justify-center outline-none gap-x-2 border border-emerald-900/30 rounded-lg bg-emerald-950/20 text-emerald-400 px-3.5 py-1.5 text-sm font-semibold transition active:(bg-emerald-950/40) hover:(bg-emerald-950/30)",
+                                isExportValidating && "cursor-not-allowed op-50 pointer-events-none",
+                            )}
+                            onClick={handleExportClick}
+                        >
+                            <Switch match={isExportValidating}>
+                                <Switch.Case value>
+                                    <div className="i-svg-spinners:180-ring size-5" />
+                                </Switch.Case>
+                                <Switch.Case value={false}>
+                                    <div className="i-mynaui:brand-whatsapp size-5 text-emerald-400" />
+                                </Switch.Case>
+                            </Switch>
+                            <span className="pr-0.5">
+                                {isExportValidating ? "Compiling Flow" : "Save & Export"}
+                            </span>
+                        </button>
+
+                        <div className="h-4 w-px bg-dark-300 mx-1" />
 
                         <div className="flex items-stretch gap-x-0.5">
                             <SocialButtonLink
@@ -87,6 +166,14 @@ export function NavigationBarModule() {
                     </div>
                 </Whenever>
             </div>
+
+            {/* Export Modal */}
+            <ExportModal
+                isOpen={isExportOpen}
+                onClose={() => setIsExportOpen(false)}
+                nodes={getNodes()}
+                edges={getEdges()}
+            />
         </div>
     );
 }
