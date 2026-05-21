@@ -7,6 +7,7 @@ export enum BuilderNode {
     CONDITIONAL_PATH = "conditional-path",
     IMAGE = "image",
     VIDEO = "video",
+    CONTACT = "contact",
 }
 
 export type BuilderNodeType = `${BuilderNode}`;

@@ -4,13 +4,14 @@ import { nanoid } from "nanoid";
 import { isEmpty } from "radash";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 
+import type { ImageNodeData } from "~/modules/nodes/nodes/image-node/types";
+
 import CustomHandle from "~/modules/flow-builder/components/handles/custom-handle";
 import { useDeleteNode } from "~/modules/flow-builder/hooks/use-delete-node";
-import type { ImageNodeData } from "~/modules/nodes/nodes/image-node/types";
 import { BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
 import { getNodeDetail } from "~/modules/nodes/utils";
-import { useApplicationState } from "~/stores/application-state";
 import ImageNodePropertyPanel from "~/modules/sidebar/panels/node-properties/property-panels/image-node-property-panel";
+import { useApplicationState } from "~/stores/application-state";
 
 import { cn } from "~@/utils/cn";
 
@@ -107,36 +108,38 @@ export function ImageNode({ id, isConnectable, selected, data }: ImageNodeProps)
                         </div>
 
                         <div className="mt-2">
-                            {isEmpty(data.imageUrl) ? (
-                                <button
-                                    type="button"
-                                    className="w-full flex flex-col items-center justify-center border border-dashed border-dark-100 rounded-lg bg-dark-400/30 p-6 transition cursor-pointer hover:(border-amber-600/50 bg-dark-400/50)"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <div className="i-mynaui:image size-8 text-light-900/30" />
-                                    <span className="mt-2 text-xs text-light-900/50 italic">
-                                        Click to upload an image
-                                    </span>
-                                </button>
-                            ) : (
-                                <div className="relative overflow-clip rounded-lg">
-                                    <img
-                                        src={data.imageUrl}
-                                        alt={data.altText || "Node image"}
-                                        className="w-full max-h-40 object-cover rounded-lg"
-                                    />
-                                    <button
-                                        type="button"
-                                        className="absolute right-1 top-1 size-6 flex items-center justify-center rounded-md bg-dark-400/80 text-light-900/70 backdrop-blur-sm transition hover:(bg-dark-300 text-light-900)"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            fileInputRef.current?.click();
-                                        }}
-                                    >
-                                        <div className="i-mynaui:edit size-3.5" />
-                                    </button>
-                                </div>
-                            )}
+                            {isEmpty(data.imageUrl)
+                                ? (
+                                        <button
+                                            type="button"
+                                            className="w-full flex flex-col cursor-pointer items-center justify-center border border-dark-100 rounded-lg border-dashed bg-dark-400/30 p-6 transition hover:(border-amber-600/50 bg-dark-400/50)"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <div className="i-mynaui:image size-8 text-light-900/30" />
+                                            <span className="mt-2 text-xs text-light-900/50 italic">
+                                                Click to upload an image
+                                            </span>
+                                        </button>
+                                    )
+                                : (
+                                        <div className="relative overflow-clip rounded-lg">
+                                            <img
+                                                src={data.imageUrl}
+                                                alt="Node image"
+                                                className="max-h-40 w-full rounded-lg object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                className="absolute right-1 top-1 size-6 flex items-center justify-center rounded-md bg-dark-400/80 text-light-900/70 backdrop-blur-sm transition hover:(bg-dark-300 text-light-900)"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    fileInputRef.current?.click();
+                                                }}
+                                            >
+                                                <div className="i-mynaui:edit size-3.5" />
+                                            </button>
+                                        </div>
+                                    )}
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -192,11 +195,10 @@ export const metadata: RegisterNodeMetadata<ImageNodeData> = {
     detail: {
         icon: "i-mynaui:image",
         title: "Image",
-        description: "Send an image to the user with an optional caption and alt text.",
+        description: "Send an image to the user with an optional caption.",
     },
     defaultData: {
         imageUrl: "",
-        altText: "",
         caption: "",
     },
     propertyPanel: ImageNodePropertyPanel,

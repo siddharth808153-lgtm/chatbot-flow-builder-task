@@ -1,10 +1,12 @@
-import { type Edge, type Node } from "@xyflow/react";
+import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
 import { useCallback, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { OverlayScrollbarsComponent } from "overlayscrollbars-react";
+
+import type { Edge, Node } from "@xyflow/react";
 
 import { BuilderNode } from "~/modules/nodes/types";
 import { defaultOverlayScrollbarsOptions } from "~/utils/overlayscrollbars";
+
 import { cn } from "~@/utils/cn";
 
 type ExportModalProps = Readonly<{
@@ -22,21 +24,21 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
     // Compile entire chatbot flow to WhatsApp compatible format
     const compiledFlow = useMemo(() => {
         const startNode = nodes.find(n => n.type === BuilderNode.START);
-        
+
         const trigger = {
             event: "message_received",
             type: (startNode?.data as any)?.triggerType || "exact",
             keywords: startNode && (startNode.data as any)?.triggerKeywords
                 ? ((startNode.data as any).triggerKeywords as string)
-                      .split(",")
-                      .map(k => k.trim())
-                      .filter(Boolean)
+                        .split(",")
+                        .map(k => k.trim())
+                        .filter(Boolean)
                 : [],
         };
 
         const getNextNodeId = (sourceId: string, sourceHandleId?: string | null) => {
             const edge = edges.find(
-                e => e.source === sourceId && (!sourceHandleId || e.sourceHandle === sourceHandleId)
+                e => e.source === sourceId && (!sourceHandleId || e.sourceHandle === sourceHandleId),
             );
             return edge ? edge.target : null;
         };
@@ -95,8 +97,58 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                         video: {
                             link: (node.data as any).videoUrl || "",
                             caption: (node.data as any).caption || "",
-                            autoplay: !!(node.data as any).autoplay,
                         },
+                    },
+                    next_node_id: getNextNodeId(node.id),
+                };
+            } else if (node.type === BuilderNode.CONTACT) {
+                compiledNodes[node.id] = {
+                    type: "contact_message",
+                    whatsapp_payload: {
+                        messaging_product: "whatsapp",
+                        recipient_type: "individual",
+                        to: "{{recipient_phone_number}}",
+                        type: "contacts",
+                        contacts: [
+                            {
+                                name: {
+                                    formatted_name: (node.data as any).formattedName || "",
+                                    first_name: (node.data as any).firstName || "",
+                                    last_name: (node.data as any).lastName || "",
+                                },
+                                phones: (node.data as any).phone
+                                    ? [
+                                            {
+                                                phone: (node.data as any).phone || "",
+                                                wa_id: (node.data as any).waId || (node.data as any).phone?.replace(/\D/g, "") || "",
+                                                type: "WORK",
+                                            },
+                                        ]
+                                    : [],
+                                org: ((node.data as any).company || (node.data as any).title)
+                                    ? {
+                                            company: (node.data as any).company || "",
+                                            title: (node.data as any).title || "",
+                                        }
+                                    : undefined,
+                                emails: (node.data as any).email
+                                    ? [
+                                            {
+                                                email: (node.data as any).email || "",
+                                                type: "WORK",
+                                            },
+                                        ]
+                                    : [],
+                                urls: (node.data as any).url
+                                    ? [
+                                            {
+                                                url: (node.data as any).url || "",
+                                                type: "WORK",
+                                            },
+                                        ]
+                                    : [],
+                            },
+                        ],
                     },
                     next_node_id: getNextNodeId(node.id),
                 };
@@ -128,9 +180,10 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
     const messageNodes = useMemo(() => {
         return nodes.filter(
             n =>
-                n.type === BuilderNode.TEXT_MESSAGE ||
-                n.type === BuilderNode.IMAGE ||
-                n.type === BuilderNode.VIDEO
+                n.type === BuilderNode.TEXT_MESSAGE
+                || n.type === BuilderNode.IMAGE
+                || n.type === BuilderNode.VIDEO
+                || n.type === BuilderNode.CONTACT,
         );
     }, [nodes]);
 
@@ -147,7 +200,7 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
         if (!node) return null;
 
         let payload = {};
-        let endpoint = "POST https://graph.facebook.com/v20.0/FROM_PHONE_NUMBER_ID/messages";
+        const endpoint = "POST https://graph.facebook.com/v20.0/FROM_PHONE_NUMBER_ID/messages";
 
         if (node.type === BuilderNode.TEXT_MESSAGE) {
             payload = {
@@ -181,12 +234,59 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                     caption: (node.data as any).caption || "",
                 },
             };
+        } else if (node.type === BuilderNode.CONTACT) {
+            payload = {
+                messaging_product: "whatsapp",
+                recipient_type: "individual",
+                to: "{{recipient_phone_number}}",
+                type: "contacts",
+                contacts: [
+                    {
+                        name: {
+                            formatted_name: (node.data as any).formattedName || "",
+                            first_name: (node.data as any).firstName || "",
+                            last_name: (node.data as any).lastName || "",
+                        },
+                        phones: (node.data as any).phone
+                            ? [
+                                    {
+                                        phone: (node.data as any).phone || "",
+                                        wa_id: (node.data as any).waId || (node.data as any).phone?.replace(/\D/g, "") || "",
+                                        type: "WORK",
+                                    },
+                                ]
+                            : [],
+                        org: ((node.data as any).company || (node.data as any).title)
+                            ? {
+                                    company: (node.data as any).company || "",
+                                    title: (node.data as any).title || "",
+                                }
+                            : undefined,
+                        emails: (node.data as any).email
+                            ? [
+                                    {
+                                        email: (node.data as any).email || "",
+                                        type: "WORK",
+                                    },
+                                ]
+                            : [],
+                        urls: (node.data as any).url
+                            ? [
+                                    {
+                                        url: (node.data as any).url || "",
+                                        type: "WORK",
+                                    },
+                                ]
+                            : [],
+                    },
+                ],
+            };
         }
 
         return {
             endpoint,
             headers: {
-                Authorization: "Bearer EAAXX...",
+                "Authorization": "Bearer EAAXX...",
                 "Content-Type": "application/json",
             },
             payload,
@@ -229,21 +329,21 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             {/* Backdrop */}
-            <div 
-                className="absolute inset-0 bg-dark-900/70 backdrop-blur-md transition-opacity duration-300 animate-fade-in"
+            <div
+                className="absolute inset-0 animate-fade-in bg-dark-900/70 backdrop-blur-md transition-opacity duration-300"
                 onClick={onClose}
             />
 
             {/* Modal Dialog */}
-            <div className="relative w-full max-w-4xl h-[85vh] flex flex-col border border-dark-100 rounded-2xl bg-dark-300 shadow-2xl overflow-hidden animate-scale-in">
+            <div className="animate-scale-in relative h-[85vh] max-w-4xl w-full flex flex-col overflow-hidden border border-dark-100 rounded-2xl bg-dark-300 shadow-2xl">
                 {/* Header */}
                 <div className="flex items-center justify-between border-b border-dark-100 bg-dark-400 px-6 py-4">
                     <div className="flex items-center gap-2.5">
-                        <div className="size-8 flex items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                        <div className="size-8 flex items-center justify-center border border-emerald-500/20 rounded-lg bg-emerald-500/10 text-emerald-400">
                             <div className="i-mynaui:check-double size-5 animate-pulse" />
                         </div>
                         <div>
-                            <h3 className="text-base font-bold text-light-50">
+                            <h3 className="text-base text-light-50 font-bold">
                                 Flow Successfully Compiled!
                             </h3>
                             <p className="text-xs text-light-900/50">
@@ -254,7 +354,7 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
 
                     <button
                         type="button"
-                        className="size-8 flex items-center justify-center border border-transparent rounded-lg text-light-900/60 hover:(bg-dark-100 text-light-50) active:(bg-dark-400) transition outline-none cursor-pointer"
+                        className="size-8 flex cursor-pointer items-center justify-center border border-transparent rounded-lg text-light-900/60 outline-none transition active:(bg-dark-400) hover:(bg-dark-100 text-light-50)"
                         onClick={onClose}
                     >
                         <div className="i-mynaui:x size-5" />
@@ -262,15 +362,15 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                 </div>
 
                 {/* Tabs */}
-                <div className="flex items-center justify-between bg-dark-400/50 px-6 py-2 border-b border-dark-100 shrink-0">
-                    <div className="flex gap-1 bg-dark-500 rounded-lg p-0.5 border border-dark-100">
+                <div className="flex shrink-0 items-center justify-between border-b border-dark-100 bg-dark-400/50 px-6 py-2">
+                    <div className="flex gap-1 border border-dark-100 rounded-lg bg-dark-500 p-0.5">
                         <button
                             type="button"
                             className={cn(
                                 "flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition outline-none cursor-pointer",
                                 activeTab === "flow"
                                     ? "bg-teal-600 text-white shadow-sm"
-                                    : "text-light-900/60 hover:text-light-50"
+                                    : "text-light-900/60 hover:text-light-50",
                             )}
                             onClick={() => setActiveTab("flow")}
                         >
@@ -283,7 +383,7 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                                 "flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-md transition outline-none cursor-pointer",
                                 activeTab === "payloads"
                                     ? "bg-teal-600 text-white shadow-sm"
-                                    : "text-light-900/60 hover:text-light-50"
+                                    : "text-light-900/60 hover:text-light-50",
                             )}
                             onClick={() => setActiveTab("payloads")}
                         >
@@ -299,7 +399,7 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                             <select
                                 value={selectedNodeIdForPayload}
                                 onChange={e => setSelectedNodeIdForPayload(e.target.value)}
-                                className="h-7 border border-dark-200 rounded-md bg-dark-400 px-2 text-xs font-medium text-light-50 shadow-sm outline-none transition hover:bg-dark-300 cursor-pointer"
+                                className="h-7 cursor-pointer border border-dark-200 rounded-md bg-dark-400 px-2 text-xs text-light-50 font-medium shadow-sm outline-none transition hover:bg-dark-300"
                             >
                                 {messageNodes.map(node => (
                                     <option key={node.id} value={node.id}>
@@ -312,24 +412,26 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                 </div>
 
                 {/* Body Content (Simulated Code Editor) */}
-                <div className="grow relative flex flex-col bg-dark-500 overflow-hidden">
+                <div className="relative flex grow flex-col overflow-hidden bg-dark-500">
                     {/* Action Bar */}
                     <div className="absolute right-4 top-4 z-10 flex gap-2">
                         <button
                             type="button"
-                            className="h-8 flex items-center gap-1.5 border border-dark-100 rounded-md bg-dark-300/90 px-3 text-xs font-semibold text-light-50 shadow-sm backdrop-blur-sm outline-none transition active:bg-dark-400 hover:bg-dark-200 cursor-pointer"
+                            className="h-8 flex cursor-pointer items-center gap-1.5 border border-dark-100 rounded-md bg-dark-300/90 px-3 text-xs text-light-50 font-semibold shadow-sm outline-none backdrop-blur-sm transition active:bg-dark-400 hover:bg-dark-200"
                             onClick={handleCopy}
                         >
-                            {isCopied ? (
-                                <div className="i-mynaui:check size-4 text-green-400" />
-                            ) : (
-                                <div className="i-mynaui:copy size-4" />
-                            )}
+                            {isCopied
+                                ? (
+                                        <div className="i-mynaui:check size-4 text-green-400" />
+                                    )
+                                : (
+                                        <div className="i-mynaui:copy size-4" />
+                                    )}
                             {isCopied ? "Copied!" : "Copy"}
                         </button>
                         <button
                             type="button"
-                            className="h-8 flex items-center gap-1.5 border border-dark-100 rounded-md bg-dark-300/90 px-3 text-xs font-semibold text-light-50 shadow-sm backdrop-blur-sm outline-none transition active:bg-dark-400 hover:bg-dark-200 cursor-pointer"
+                            className="h-8 flex cursor-pointer items-center gap-1.5 border border-dark-100 rounded-md bg-dark-300/90 px-3 text-xs text-light-50 font-semibold shadow-sm outline-none backdrop-blur-sm transition active:bg-dark-400 hover:bg-dark-200"
                             onClick={handleDownload}
                         >
                             <div className="i-mynaui:download size-4" />
@@ -338,21 +440,22 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
                     </div>
 
                     {/* Simulated Code Panel */}
-                    <OverlayScrollbarsComponent 
-                        className="grow font-mono text-xs p-6"
+                    <OverlayScrollbarsComponent
+                        className="grow p-6 text-xs font-mono"
                         defer
                         options={defaultOverlayScrollbarsOptions}
                     >
-                        <div className="flex gap-4 min-w-full">
+                        <div className="min-w-full flex gap-4">
                             {/* Line Numbers */}
-                            <div className="text-light-900/20 select-none text-right pr-2 border-r border-dark-100/10">
+                            <div className="select-none border-r border-dark-100/10 pr-2 text-right text-light-900/20">
                                 {codeString.split("\n").map((_, i) => (
+                                    // eslint-disable-next-line react/no-array-index-key
                                     <div key={i}>{i + 1}</div>
                                 ))}
                             </div>
 
                             {/* Actual code display with elegant formatting */}
-                            <pre className="text-emerald-400 leading-relaxed overflow-x-auto whitespace-pre">
+                            <pre className="overflow-x-auto whitespace-pre text-emerald-400 leading-relaxed">
                                 {codeString}
                             </pre>
                         </div>

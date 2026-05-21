@@ -1,0 +1,201 @@
+import { type Node, type NodeProps, Position } from "@xyflow/react";
+import { nanoid } from "nanoid";
+import { memo, useCallback, useMemo, useState } from "react";
+
+import CustomHandle from "~/modules/flow-builder/components/handles/custom-handle";
+import { useDeleteNode } from "~/modules/flow-builder/hooks/use-delete-node";
+import { type BaseNodeData, BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
+import { getNodeDetail } from "~/modules/nodes/utils";
+import ContactNodePropertyPanel from "~/modules/sidebar/panels/node-properties/property-panels/contact-node-property-panel";
+import { useApplicationState } from "~/stores/application-state";
+
+import { cn } from "~@/utils/cn";
+
+export interface ContactNodeData extends BaseNodeData {
+    formattedName: string;
+    firstName: string;
+    lastName: string;
+    phone: string;
+    waId: string;
+    company?: string;
+    title?: string;
+    email?: string;
+    url?: string;
+}
+
+const NODE_TYPE = BuilderNode.CONTACT;
+
+type ContactNodeProps = NodeProps<Node<ContactNodeData, typeof NODE_TYPE>>;
+
+export function ContactNode({ id, isConnectable, selected, data }: ContactNodeProps) {
+    const meta = useMemo(() => getNodeDetail(NODE_TYPE), []);
+
+    const [showNodePropertiesOf] = useApplicationState(s => [s.actions.sidebar.showNodePropertiesOf]);
+    const [sourceHandleId] = useState<string>(nanoid());
+    const deleteNode = useDeleteNode();
+
+    const showNodeProperties = useCallback(() => {
+        showNodePropertiesOf({ id, type: NODE_TYPE });
+    }, [id, showNodePropertiesOf]);
+
+    const hasContact = useMemo(() => {
+        return !!(data.formattedName || data.firstName || data.lastName || data.phone);
+    }, [data.formattedName, data.firstName, data.lastName, data.phone]);
+
+    return (
+        <>
+            <div
+                data-selected={selected}
+                className="w-xs overflow-clip border border-dark-200 rounded-xl bg-dark-300/50 shadow-sm backdrop-blur-xl transition divide-y divide-dark-200 data-[selected=true]:(border-cyan-600 ring-1 ring-cyan-600/50)"
+                onDoubleClick={showNodeProperties}
+            >
+                {/* Node Header */}
+                <div className="relative bg-dark-300/50">
+                    <div className="absolute inset-0">
+                        <div className="absolute h-full w-3/5 from-cyan-900/20 to-transparent bg-gradient-to-r" />
+                    </div>
+
+                    <div className="relative h-9 flex items-center justify-between gap-x-4 px-0.5 py-0.5">
+                        <div className="flex grow items-center pl-0.5">
+                            <div className="size-7 flex items-center justify-center">
+                                <div className="size-6 flex items-center justify-center rounded-lg bg-cyan-500/10 text-cyan-400">
+                                    <div className={cn(meta.icon, "size-4")} />
+                                </div>
+                            </div>
+
+                            <div className="ml-1 text-xs text-cyan-400/90 font-semibold leading-none tracking-wide uppercase op-80">
+                                <span className="translate-y-px">
+                                    {meta.title}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex shrink-0 items-center gap-x-0.5 pr-0.5">
+                            <button
+                                type="button"
+                                className="size-7 flex items-center justify-center border border-transparent rounded-lg bg-transparent text-cyan-400 outline-none transition active:(border-dark-200 bg-dark-400/50) hover:(bg-dark-100)"
+                                onClick={() => showNodeProperties()}
+                            >
+                                <div className="i-mynaui:cog size-4" />
+                            </button>
+
+                            <button
+                                type="button"
+                                className="size-7 flex items-center justify-center border border-transparent rounded-lg bg-transparent text-red-400 outline-none transition active:(border-dark-200 bg-dark-400/50) hover:(bg-dark-100)"
+                                onClick={() => deleteNode(id)}
+                            >
+                                <div className="i-mynaui:trash size-4" />
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {/* Node Body Content */}
+                <div className="flex flex-col divide-y divide-dark-200">
+                    <div className="flex flex-col gap-y-2 p-4">
+                        {hasContact
+                            ? (
+                                    <div className="flex flex-col gap-y-1.5">
+                                        {/* Name Details */}
+                                        <div className="flex items-center gap-x-2">
+                                            <div className="size-8 flex shrink-0 items-center justify-center border border-cyan-500/20 rounded-full bg-cyan-500/10 text-cyan-400">
+                                                <div className="i-mynaui:user size-4" />
+                                            </div>
+                                            <div className="min-w-0 flex flex-col">
+                                                <div className="truncate text-xs text-light-50 font-bold">
+                                                    {data.formattedName || `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Unnamed Contact"}
+                                                </div>
+                                                {(data.company || data.title) && (
+                                                    <div className="truncate text-[10px] text-light-900/50 leading-none">
+                                                        {data.title ? `${data.title} @ ` : ""}
+                                                        {data.company || ""}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Phone & wa_id Details */}
+                                        {data.phone && (
+                                            <div className="mt-1 flex flex-col gap-y-1 border border-dark-100/50 rounded-lg bg-dark-400/30 p-2">
+                                                <div className="flex items-center gap-x-1.5 text-xs text-light-900/70">
+                                                    <div className="i-mynaui:telephone size-3 text-cyan-400 op-80" />
+                                                    <span className="text-[11px] font-mono">{data.phone}</span>
+                                                </div>
+                                                {data.waId && (
+                                                    <div className="flex items-center gap-x-1.5 text-[9px] text-emerald-400">
+                                                        <div className="i-mynaui:brand-whatsapp size-3 shrink-0" />
+                                                        <span>
+                                                            wa_id:
+                                                            {data.waId}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            : (
+                                    <button
+                                        type="button"
+                                        className="w-full flex flex-col cursor-pointer items-center justify-center border border-dark-100 rounded-lg border-dashed bg-dark-400/30 p-6 transition hover:(border-cyan-600/50 bg-dark-400/50)"
+                                        onClick={showNodeProperties}
+                                    >
+                                        <div className="i-mynaui:book-address size-8 text-light-900/30" />
+                                        <span className="mt-2 text-xs text-light-900/50 italic">
+                                            Double click to add contact info
+                                        </span>
+                                    </button>
+                                )}
+                    </div>
+
+                    {/* Node Footer */}
+                    <div className="bg-dark-300/30 px-4 py-2 text-xs text-light-900/50">
+                        Node:
+                        {" "}
+                        <span className="text-light-900/60 font-semibold">
+                            #
+                            {id}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Connection Handles */}
+            <CustomHandle
+                type="target"
+                id={sourceHandleId}
+                position={Position.Left}
+                isConnectable={isConnectable}
+            />
+
+            <CustomHandle
+                type="source"
+                id={sourceHandleId}
+                position={Position.Right}
+                isConnectable={isConnectable}
+            />
+        </>
+    );
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
+export const metadata: RegisterNodeMetadata<ContactNodeData> = {
+    type: NODE_TYPE,
+    node: memo(ContactNode),
+    detail: {
+        icon: "i-mynaui:user",
+        title: "Contact",
+        description: "Share contact card information (vCard format) to users via WhatsApp.",
+    },
+    defaultData: {
+        formattedName: "",
+        firstName: "",
+        lastName: "",
+        phone: "",
+        waId: "",
+        company: "",
+        title: "",
+        email: "",
+        url: "",
+    },
+    propertyPanel: ContactNodePropertyPanel,
+};

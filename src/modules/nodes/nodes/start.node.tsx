@@ -70,7 +70,7 @@ export function StartNode({ id, data, selected, isConnectable }: StartNodeProps)
                                 </div>
                             </div>
 
-                            <div className="ml-1 text-xs font-semibold leading-none tracking-wide uppercase text-emerald-400/90 op-80">
+                            <div className="ml-1 text-xs text-emerald-400/90 font-semibold leading-none tracking-wide uppercase op-80">
                                 <span className="translate-y-px">
                                     {data.label || meta.title}
                                 </span>
@@ -96,7 +96,9 @@ export function StartNode({ id, data, selected, isConnectable }: StartNodeProps)
                         </div>
 
                         <div className="mt-1.5 text-xs text-light-900/60 font-medium">
-                            Rule: <span className="text-light-50 font-semibold">{TriggerRuleLabels[activeTriggerRule]}</span>
+                            Rule:
+                            {" "}
+                            <span className="text-light-50 font-semibold">{TriggerRuleLabels[activeTriggerRule]}</span>
                         </div>
 
                         <div className="mt-2.5">
@@ -104,23 +106,26 @@ export function StartNode({ id, data, selected, isConnectable }: StartNodeProps)
                                 <div className="text-[10px] text-light-900/40">
                                     Keywords:
                                 </div>
-                                {keywordList.length === 0 ? (
-                                    <div className="text-xs text-red-400/80 italic">
-                                        No triggers configured yet. Double click node to edit.
-                                    </div>
-                                ) : (
-                                    <div className="flex flex-wrap gap-1">
-                                        {keywordList.map((kw, i) => (
-                                            <span
-                                                key={i}
-                                                className="flex items-center gap-x-1 px-2 py-0.5 text-[10px] font-medium rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
-                                            >
-                                                <div className={cn(TriggerRuleIcons[activeTriggerRule], "size-3 op-70")} />
-                                                <span>{kw}</span>
-                                            </span>
-                                        ))}
-                                    </div>
-                                )}
+                                {keywordList.length === 0
+                                    ? (
+                                            <div className="text-xs text-red-400/80 italic">
+                                                No triggers configured yet. Double click node to edit.
+                                            </div>
+                                        )
+                                    : (
+                                            <div className="flex flex-wrap gap-1">
+                                                {keywordList.map((kw, i) => (
+                                                    <span
+                                                        // eslint-disable-next-line react/no-array-index-key
+                                                        key={i}
+                                                        className="flex items-center gap-x-1 border border-emerald-500/20 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400 font-medium"
+                                                    >
+                                                        <div className={cn(TriggerRuleIcons[activeTriggerRule], "size-3 op-70")} />
+                                                        <span>{kw}</span>
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        )}
                             </div>
                         </div>
                     </div>

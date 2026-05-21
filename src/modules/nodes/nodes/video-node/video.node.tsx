@@ -4,13 +4,14 @@ import { nanoid } from "nanoid";
 import { isEmpty } from "radash";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
 
+import type { VideoNodeData } from "~/modules/nodes/nodes/video-node/types";
+
 import CustomHandle from "~/modules/flow-builder/components/handles/custom-handle";
 import { useDeleteNode } from "~/modules/flow-builder/hooks/use-delete-node";
-import type { VideoNodeData } from "~/modules/nodes/nodes/video-node/types";
 import { BuilderNode, type RegisterNodeMetadata } from "~/modules/nodes/types";
 import { getNodeDetail } from "~/modules/nodes/utils";
-import { useApplicationState } from "~/stores/application-state";
 import VideoNodePropertyPanel from "~/modules/sidebar/panels/node-properties/property-panels/video-node-property-panel";
+import { useApplicationState } from "~/stores/application-state";
 
 import { cn } from "~@/utils/cn";
 
@@ -107,43 +108,45 @@ export function VideoNode({ id, isConnectable, selected, data }: VideoNodeProps)
                         </div>
 
                         <div className="mt-2">
-                            {isEmpty(data.videoUrl) ? (
-                                <button
-                                    type="button"
-                                    className="w-full flex flex-col items-center justify-center border border-dashed border-dark-100 rounded-lg bg-dark-400/30 p-6 transition cursor-pointer hover:(border-rose-600/50 bg-dark-400/50)"
-                                    onClick={() => fileInputRef.current?.click()}
-                                >
-                                    <div className="i-mynaui:video size-8 text-light-900/30" />
-                                    <span className="mt-2 text-xs text-light-900/50 italic">
-                                        Click to upload a video
-                                    </span>
-                                </button>
-                            ) : (
-                                <div className="relative overflow-clip rounded-lg">
-                                    <video
-                                        src={data.videoUrl}
-                                        className="w-full max-h-40 rounded-lg object-cover"
-                                        muted
-                                        playsInline
-                                        preload="metadata"
-                                    />
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <div className="size-10 flex items-center justify-center rounded-full bg-dark-400/70 backdrop-blur-sm">
-                                            <div className="i-mynaui:play size-5 text-light-50" />
+                            {isEmpty(data.videoUrl)
+                                ? (
+                                        <button
+                                            type="button"
+                                            className="w-full flex flex-col cursor-pointer items-center justify-center border border-dark-100 rounded-lg border-dashed bg-dark-400/30 p-6 transition hover:(border-rose-600/50 bg-dark-400/50)"
+                                            onClick={() => fileInputRef.current?.click()}
+                                        >
+                                            <div className="i-mynaui:video size-8 text-light-900/30" />
+                                            <span className="mt-2 text-xs text-light-900/50 italic">
+                                                Click to upload a video
+                                            </span>
+                                        </button>
+                                    )
+                                : (
+                                        <div className="relative overflow-clip rounded-lg">
+                                            <video
+                                                src={data.videoUrl}
+                                                className="max-h-40 w-full rounded-lg object-cover"
+                                                muted
+                                                playsInline
+                                                preload="metadata"
+                                            />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="size-10 flex items-center justify-center rounded-full bg-dark-400/70 backdrop-blur-sm">
+                                                    <div className="i-mynaui:play size-5 text-light-50" />
+                                                </div>
+                                            </div>
+                                            <button
+                                                type="button"
+                                                className="absolute right-1 top-1 size-6 flex items-center justify-center rounded-md bg-dark-400/80 text-light-900/70 backdrop-blur-sm transition hover:(bg-dark-300 text-light-900)"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    fileInputRef.current?.click();
+                                                }}
+                                            >
+                                                <div className="i-mynaui:edit size-3.5" />
+                                            </button>
                                         </div>
-                                    </div>
-                                    <button
-                                        type="button"
-                                        className="absolute right-1 top-1 size-6 flex items-center justify-center rounded-md bg-dark-400/80 text-light-900/70 backdrop-blur-sm transition hover:(bg-dark-300 text-light-900)"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            fileInputRef.current?.click();
-                                        }}
-                                    >
-                                        <div className="i-mynaui:edit size-3.5" />
-                                    </button>
-                                </div>
-                            )}
+                                    )}
                             <input
                                 ref={fileInputRef}
                                 type="file"
@@ -160,15 +163,6 @@ export function VideoNode({ id, isConnectable, selected, data }: VideoNodeProps)
                                 <b className="text-light-900/60 font-semibold">Caption:</b>
                                 {" "}
                                 {data.caption}
-                            </div>
-                        </div>
-                    )}
-
-                    {data.autoplay && (
-                        <div className="px-4 py-2">
-                            <div className="flex items-center gap-1.5 text-xs text-light-900/50">
-                                <div className="i-mynaui:play size-3.5 text-rose-400" />
-                                <span>Autoplay enabled</span>
                             </div>
                         </div>
                     )}
@@ -208,12 +202,11 @@ export const metadata: RegisterNodeMetadata<VideoNodeData> = {
     detail: {
         icon: "i-mynaui:video",
         title: "Video",
-        description: "Send a video to the user with an optional caption and autoplay setting.",
+        description: "Send a video to the user with an optional caption.",
     },
     defaultData: {
         videoUrl: "",
         caption: "",
-        autoplay: false,
     },
     propertyPanel: VideoNodePropertyPanel,
 };

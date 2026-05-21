@@ -1,13 +1,13 @@
+import { type Node, getConnectedEdges, useReactFlow } from "@xyflow/react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { useReactFlow, getConnectedEdges, type Node } from "@xyflow/react";
 
 import { useFlowValidator } from "~/modules/flow-builder/hooks/use-flow-validator";
+import { ExportModal } from "~/modules/navigation-bar/components/export-modal";
 import { SocialButtonLink } from "~/modules/navigation-bar/components/social-button-link";
+import { BuilderNode } from "~/modules/nodes/types";
 import { useApplicationState } from "~/stores/application-state";
 import { trackSocialLinkClick } from "~/utils/ga4";
-import { BuilderNode } from "~/modules/nodes/types";
-import { ExportModal } from "~/modules/navigation-bar/components/export-modal";
 
 import { Switch } from "~@/components/generics/switch-case";
 import { Whenever } from "~@/components/generics/whenever";
@@ -31,7 +31,7 @@ export function NavigationBarModule() {
         setIsExportValidating(true);
         // Add visual validation feedback delay
         await new Promise(resolve => setTimeout(resolve, 400));
-        
+
         const nodes = getNodes();
         const edges = getEdges();
         const connectedEdges = getConnectedEdges(nodes, edges);
@@ -68,15 +68,15 @@ export function NavigationBarModule() {
         if (isFlowComplete) {
             setIsExportOpen(true);
         } else {
-            toast.error("Flow is invalid", { 
+            toast.error("Flow is invalid", {
                 description: "Cannot export. Please check if the flow is complete and has no lone nodes.",
-                dismissible: true
+                dismissible: true,
             });
         }
     };
 
     return (
-        <div className="relative shrink-0 bg-dark-700 px-1.5 py-2 border-b border-dark-300">
+        <div className="relative shrink-0 border-b border-dark-300 bg-dark-700 px-1.5 py-2">
             <div className="absolute inset-0">
                 <div className="absolute h-full w-4/12 from-teal-900/20 to-transparent bg-gradient-to-r <md:(from-teal-900/50)" />
             </div>
@@ -146,7 +146,7 @@ export function NavigationBarModule() {
                             </span>
                         </button>
 
-                        <div className="h-4 w-px bg-dark-300 mx-1" />
+                        <div className="mx-1 h-4 w-px bg-dark-300" />
 
                         <div className="flex items-stretch gap-x-0.5">
                             <SocialButtonLink

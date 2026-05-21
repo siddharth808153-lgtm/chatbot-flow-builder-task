@@ -109,7 +109,7 @@ export default function StartNodePropertyPanel({ id, data, updateData }: StartNo
                                             <div className="flex items-center gap-x-2">
                                                 <div className={cn(v.icon, "size-4 text-emerald-400")} />
 
-                                                <div className="text-xs font-semibold leading-none tracking-wide text-light-50">
+                                                <div className="text-xs text-light-50 font-semibold leading-none tracking-wide">
                                                     {v.name}
                                                 </div>
                                             </div>
@@ -141,8 +141,9 @@ export default function StartNodePropertyPanel({ id, data, updateData }: StartNo
 
                 <div className="mt-1.5 text-[10px] text-light-900/40 leading-normal">
                     <span>
-                        Separate multiple keywords with commas. E.g.{" "}
-                        <code className="bg-dark-400 px-1 py-0.5 rounded text-emerald-400 font-mono">
+                        Separate multiple keywords with commas. E.g.
+                        {" "}
+                        <code className="rounded bg-dark-400 px-1 py-0.5 text-emerald-400 font-mono">
                             hello, hi, start
                         </code>
                     </span>
