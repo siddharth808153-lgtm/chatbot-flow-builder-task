@@ -3,6 +3,7 @@ import { produce } from "immer";
 import { nanoid } from "nanoid";
 import { isEmpty } from "radash";
 import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 
 import type { ImageNodeData } from "~/modules/nodes/nodes/image-node/types";
 
@@ -35,6 +36,12 @@ export function ImageNode({ id, isConnectable, selected, data }: ImageNodeProps)
         (e: React.ChangeEvent<HTMLInputElement>) => {
             const file = e.target.files?.[0];
             if (!file) return;
+
+            // Meta guideline: image size limit is 5MB
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("Image file size exceeds the Meta guideline limit of 5 MB.");
+                return;
+            }
 
             const reader = new FileReader();
             reader.onload = (event) => {

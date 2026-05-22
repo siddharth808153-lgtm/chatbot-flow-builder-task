@@ -37,7 +37,6 @@ export function NavigationBarModule() {
         const connectedEdges = getConnectedEdges(nodes, edges);
 
         let isStartConnected = false;
-        let isEndConnected = false;
         const nodesWithEmptyTarget: Node[] = [];
 
         for (const node of nodes) {
@@ -46,11 +45,9 @@ export function NavigationBarModule() {
 
             if (node.type === BuilderNode.START) {
                 isStartConnected = outgoingEdges.length >= 1;
-            } else if (node.type === BuilderNode.END) {
-                isEndConnected = incomingEdges.length === 1;
             }
 
-            // Lone node check (excluding the start and end nodes specifically)
+            // Lone node check (excluding the start node specifically)
             const isLone = node.type === BuilderNode.START
                 ? outgoingEdges.length === 0
                 : incomingEdges.length === 0;
@@ -61,7 +58,7 @@ export function NavigationBarModule() {
         }
 
         const hasAnyLoneNode = nodesWithEmptyTarget.length > 0;
-        const isFlowComplete = isStartConnected && isEndConnected && !hasAnyLoneNode;
+        const isFlowComplete = isStartConnected && !hasAnyLoneNode;
 
         setIsExportValidating(false);
 

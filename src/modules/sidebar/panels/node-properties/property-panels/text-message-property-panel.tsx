@@ -88,13 +88,19 @@ export default function TextMessageNodePropertyPanel({ id, data, updateData }: T
             </div>
 
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Message
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Message
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.message || "").length} / 4096
+                    </span>
                 </div>
 
                 <div className="mt-2 flex">
                     <textarea
                         value={data.message}
+                        maxLength={4096}
                         onChange={e => updateData({ message: e.target.value })}
                         placeholder="Type your message here..."
                         className="min-h-30 w-full resize-none border border-dark-200 rounded-md bg-dark-400 px-2.5 py-2 text-sm font-medium shadow-sm outline-none transition focus:(border-teal-800 bg-dark-500 ring-2 ring-teal-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic) read-only:(text-light-900/80)"

@@ -155,12 +155,18 @@ export default function InteractiveNodePropertyPanel({ id, data, updateData }: I
 
             {/* Prompt Text / Body Prompt */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Body Text Prompt
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Body Text Prompt
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.bodyText || "").length} / 1024
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <textarea
                         value={data.bodyText || ""}
+                        maxLength={1024}
                         onChange={e => updateData({ bodyText: e.target.value })}
                         placeholder="Choose an option below to continue..."
                         className="min-h-20 w-full resize-none border border-dark-200 rounded-md bg-dark-400 px-2.5 py-2 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -177,14 +183,19 @@ export default function InteractiveNodePropertyPanel({ id, data, updateData }: I
                     <div className="flex flex-col gap-2.5">
                         {(data.buttons || []).map((btn, idx) => (
                             <div key={btn.id} className="flex items-center gap-2">
-                                <input
-                                    type="text"
-                                    value={btn.title}
-                                    maxLength={20}
-                                    onChange={e => handleUpdateButtonTitle(btn.id, e.target.value)}
-                                    placeholder={`Button ${idx + 1}`}
-                                    className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
-                                />
+                                <div className="relative flex-grow">
+                                    <input
+                                        type="text"
+                                        value={btn.title}
+                                        maxLength={20}
+                                        onChange={e => handleUpdateButtonTitle(btn.id, e.target.value)}
+                                        placeholder={`Button ${idx + 1}`}
+                                        className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 pl-2.5 pr-12 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
+                                    />
+                                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-light-900/40 select-none font-semibold">
+                                        {(btn.title || "").length}/20
+                                    </span>
+                                </div>
                                 <button
                                     type="button"
                                     className="size-8 flex shrink-0 items-center justify-center border border-dark-100 rounded-md bg-dark-300 text-red-400 outline-none transition hover:(border-red-500/30 bg-dark-200)"
@@ -214,14 +225,19 @@ export default function InteractiveNodePropertyPanel({ id, data, updateData }: I
                     <div className="text-xs text-light-900/60 font-semibold">
                         List Action Button Label
                     </div>
-                    <input
-                        type="text"
-                        value={data.listButtonText || ""}
-                        maxLength={20}
-                        onChange={e => updateData({ listButtonText: e.target.value })}
-                        placeholder="View Options"
-                        className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
-                    />
+                    <div className="relative">
+                        <input
+                            type="text"
+                            value={data.listButtonText || ""}
+                            maxLength={20}
+                            onChange={e => updateData({ listButtonText: e.target.value })}
+                            placeholder="View Options"
+                            className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 pl-2.5 pr-12 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
+                        />
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-light-900/40 select-none font-semibold">
+                            {(data.listButtonText || "").length}/20
+                        </span>
+                    </div>
 
                     <div className="mt-1 text-xs text-light-900/60 font-semibold">
                         List Menu Options (Max 10)
@@ -230,22 +246,32 @@ export default function InteractiveNodePropertyPanel({ id, data, updateData }: I
                         {(data.listRows || []).map((row, idx) => (
                             <div key={row.id} className="flex items-start gap-2 border-b border-dark-100/30 pb-3">
                                 <div className="flex flex-1 flex-col gap-2">
-                                    <input
-                                        type="text"
-                                        value={row.title}
-                                        maxLength={24}
-                                        onChange={e => handleUpdateRowField(row.id, "title", e.target.value)}
-                                        placeholder={`Option ${idx + 1} Label`}
-                                        className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-xs font-semibold shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={row.description || ""}
-                                        maxLength={72}
-                                        onChange={e => handleUpdateRowField(row.id, "description", e.target.value)}
-                                        placeholder="Optional subtitle / description"
-                                        className="h-7 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-[11px] font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={row.title}
+                                            maxLength={24}
+                                            onChange={e => handleUpdateRowField(row.id, "title", e.target.value)}
+                                            placeholder={`Option ${idx + 1} Label`}
+                                            className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 pl-2.5 pr-12 text-xs font-semibold shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
+                                        />
+                                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-light-900/40 select-none font-semibold">
+                                            {(row.title || "").length}/24
+                                        </span>
+                                    </div>
+                                    <div className="relative">
+                                        <input
+                                            type="text"
+                                            value={row.description || ""}
+                                            maxLength={72}
+                                            onChange={e => handleUpdateRowField(row.id, "description", e.target.value)}
+                                            placeholder="Optional subtitle / description"
+                                            className="h-7 w-full border border-dark-200 rounded-md bg-dark-400 pl-2.5 pr-12 text-[11px] font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
+                                        />
+                                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-light-900/40 select-none font-semibold">
+                                            {(row.description || "").length}/72
+                                        </span>
+                                    </div>
                                 </div>
                                 <button
                                     type="button"
@@ -277,14 +303,19 @@ export default function InteractiveNodePropertyPanel({ id, data, updateData }: I
                         <div className="text-xs text-light-900/60 font-semibold">
                             CTA Button Text
                         </div>
-                        <input
-                            type="text"
-                            value={data.ctaText || ""}
-                            maxLength={20}
-                            onChange={e => updateData({ ctaText: e.target.value })}
-                            placeholder="Open Link"
-                            className="mt-2 h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
-                        />
+                        <div className="relative mt-2">
+                            <input
+                                type="text"
+                                value={data.ctaText || ""}
+                                maxLength={20}
+                                onChange={e => updateData({ ctaText: e.target.value })}
+                                placeholder="Open Link"
+                                className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 pl-2.5 pr-12 text-sm font-medium shadow-sm outline-none transition focus:(border-indigo-800 bg-dark-500 ring-2 ring-indigo-800/50) hover:(bg-dark-300/60)"
+                            />
+                            <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[9px] text-light-900/40 select-none font-semibold">
+                                {(data.ctaText || "").length}/20
+                            </span>
+                        </div>
                     </div>
                     <div className="flex flex-col">
                         <div className="text-xs text-light-900/60 font-semibold">

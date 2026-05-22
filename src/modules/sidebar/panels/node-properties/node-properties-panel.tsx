@@ -63,9 +63,9 @@ export function NodePropertiesPanel() {
                                 {nodeList.map(node => (
                                     <NodeListItem
                                         key={node.id}
-                                        id={node.type === BuilderNode.START || node.type === BuilderNode.END ? undefined : node.id}
+                                        id={node.type === BuilderNode.START ? undefined : node.id}
                                         title={node.detail.title}
-                                        icon={`${node.detail.icon} ${node.type === BuilderNode.START || node.type === BuilderNode.END ? "scale-135" : ""}`}
+                                        icon={`${node.detail.icon} ${node.type === BuilderNode.START ? "scale-135" : ""}`}
                                         selected={selectedNode?.id === node.id}
                                         pseudoSelected={node.selected}
                                         onClick={() => {

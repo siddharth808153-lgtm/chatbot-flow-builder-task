@@ -47,12 +47,7 @@ export function ExportModal({ isOpen, onClose, nodes, edges }: ExportModalProps)
 
         // Loop over nodes to construct their WhatsApp payloads and routing steps
         nodes.forEach((node) => {
-            if (node.type === BuilderNode.START || node.type === BuilderNode.END) {
-                if (node.type === BuilderNode.END) {
-                    compiledNodes[node.id] = {
-                        type: "end_flow",
-                    };
-                }
+            if (node.type === BuilderNode.START) {
                 return;
             }
 

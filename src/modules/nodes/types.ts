@@ -2,7 +2,6 @@ import type { ComponentType } from "react";
 
 export enum BuilderNode {
     START = "start",
-    END = "end",
     TEXT_MESSAGE = "text-message",
     CONDITIONAL_PATH = "conditional-path",
     IMAGE = "image",
@@ -11,6 +10,7 @@ export enum BuilderNode {
     INTERACTIVE = "interactive",
     HANDOFF = "handoff",
     LOCATION = "location",
+    PDF = "pdf",
 }
 
 export type BuilderNodeType = `${BuilderNode}`;

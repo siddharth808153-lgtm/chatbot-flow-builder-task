@@ -10,12 +10,10 @@ function findEdges(node: Node, connectedEdges: Edge[]) {
     return { outgoingEdges, incomingEdges };
 }
 
-function checkFlowTerminalNode(outgoingEdges: Edge[], incomingEdges: Edge[], type: string) {
+function checkFlowTerminalNode(outgoingEdges: Edge[], type: string) {
     switch (type) {
         case BuilderNode.START:
             return outgoingEdges.length >= 1;
-        case BuilderNode.END:
-            return incomingEdges.length === 1;
         default:
             return false;
     }
@@ -46,23 +44,20 @@ export function useFlowValidator(onValidate?: (isValid: boolean) => void): [bool
         const connectedEdges = getConnectedEdges(nodes, edges);
 
         let isStartConnected = false;
-        let isEndConnected = false;
         const nodesWithEmptyTarget: Node[] = [];
 
         for (const node of nodes) {
             const { outgoingEdges, incomingEdges } = findEdges(node, connectedEdges);
 
             if (node.type === BuilderNode.START)
-                isStartConnected = checkFlowTerminalNode(outgoingEdges, incomingEdges, BuilderNode.START);
-            else if (node.type === BuilderNode.END)
-                isEndConnected = checkFlowTerminalNode(outgoingEdges, incomingEdges, BuilderNode.END);
+                isStartConnected = checkFlowTerminalNode(outgoingEdges, BuilderNode.START);
 
             if (checkLoneNode(outgoingEdges, incomingEdges, node.type as BuilderNodeType))
                 nodesWithEmptyTarget.push(node);
         }
 
         const hasAnyLoneNode = nodesWithEmptyTarget.length > 0;
-        const isFlowComplete = isStartConnected && isEndConnected && !hasAnyLoneNode;
+        const isFlowComplete = isStartConnected && !hasAnyLoneNode;
 
         onValidate?.(isFlowComplete);
 
