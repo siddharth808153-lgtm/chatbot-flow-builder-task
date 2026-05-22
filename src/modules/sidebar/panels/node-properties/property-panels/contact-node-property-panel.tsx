@@ -65,13 +65,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
             {/* Name Fields */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col">
-                    <div className="text-xs text-light-900/60 font-semibold">
-                        First Name
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-light-900/60 font-semibold">
+                            First Name
+                        </div>
+                        <span className="text-[10px] text-light-900/40">
+                            {(data.firstName || "").length} / 50
+                        </span>
                     </div>
                     <div className="mt-2 flex">
                         <input
                             type="text"
                             value={data.firstName || ""}
+                            maxLength={50}
                             onChange={e => handleFirstChange(e.target.value)}
                             placeholder="John"
                             className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -80,13 +86,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
                 </div>
 
                 <div className="flex flex-col">
-                    <div className="text-xs text-light-900/60 font-semibold">
-                        Last Name
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-light-900/60 font-semibold">
+                            Last Name
+                        </div>
+                        <span className="text-[10px] text-light-900/40">
+                            {(data.lastName || "").length} / 50
+                        </span>
                     </div>
                     <div className="mt-2 flex">
                         <input
                             type="text"
                             value={data.lastName || ""}
+                            maxLength={50}
                             onChange={e => handleLastChange(e.target.value)}
                             placeholder="Doe"
                             className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -97,13 +109,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
 
             {/* Formatted Name */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Formatted Name (Display Name)
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Formatted Name (Display Name)
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.formattedName || "").length} / 100
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <input
                         type="text"
                         value={data.formattedName || ""}
+                        maxLength={100}
                         onChange={e => updateData({ formattedName: e.target.value })}
                         placeholder="John Doe"
                         className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -116,13 +134,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
 
             {/* Phone Number */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Phone Number
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Phone Number
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.phone || "").length} / 30
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <input
                         type="text"
                         value={data.phone || ""}
+                        maxLength={30}
                         onChange={e => handlePhoneChange(e.target.value)}
                         placeholder="+1 (650) 555-1234"
                         className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -132,13 +156,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
 
             {/* WhatsApp ID */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    WhatsApp wa_id
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        WhatsApp wa_id
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.waId || "").length} / 30
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <input
                         type="text"
                         value={data.waId || ""}
+                        maxLength={30}
                         onChange={e => updateData({ waId: e.target.value })}
                         placeholder="16505551234"
                         className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -152,13 +182,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
             {/* Organization Info */}
             <div className="grid grid-cols-2 gap-2">
                 <div className="flex flex-col">
-                    <div className="text-xs text-light-900/60 font-semibold">
-                        Company Name
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-light-900/60 font-semibold">
+                            Company Name
+                        </div>
+                        <span className="text-[10px] text-light-900/40">
+                            {(data.company || "").length} / 50
+                        </span>
                     </div>
                     <div className="mt-2 flex">
                         <input
                             type="text"
                             value={data.company || ""}
+                            maxLength={50}
                             onChange={e => updateData({ company: e.target.value })}
                             placeholder="Example Corp"
                             className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -167,13 +203,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
                 </div>
 
                 <div className="flex flex-col">
-                    <div className="text-xs text-light-900/60 font-semibold">
-                        Job Title
+                    <div className="flex items-center justify-between">
+                        <div className="text-xs text-light-900/60 font-semibold">
+                            Job Title
+                        </div>
+                        <span className="text-[10px] text-light-900/40">
+                            {(data.title || "").length} / 50
+                        </span>
                     </div>
                     <div className="mt-2 flex">
                         <input
                             type="text"
                             value={data.title || ""}
+                            maxLength={50}
                             onChange={e => updateData({ title: e.target.value })}
                             placeholder="Manager"
                             className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -184,13 +226,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
 
             {/* Email Address */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Email Address
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Email Address
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.email || "").length} / 80
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <input
                         type="email"
                         value={data.email || ""}
+                        maxLength={80}
                         onChange={e => updateData({ email: e.target.value })}
                         placeholder="john.doe@example.com"
                         className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"
@@ -200,13 +248,19 @@ export default function ContactNodePropertyPanel({ id, data, updateData }: Conta
 
             {/* Website URL */}
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Website URL
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Website URL
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.url || "").length} / 200
+                    </span>
                 </div>
                 <div className="mt-2 flex">
                     <input
                         type="url"
                         value={data.url || ""}
+                        maxLength={200}
                         onChange={e => updateData({ url: e.target.value })}
                         placeholder="https://www.example.com"
                         className="h-8 w-full border border-dark-200 rounded-md bg-dark-400 px-2.5 text-sm font-medium shadow-sm outline-none transition focus:(border-cyan-800 bg-dark-500 ring-2 ring-cyan-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic)"

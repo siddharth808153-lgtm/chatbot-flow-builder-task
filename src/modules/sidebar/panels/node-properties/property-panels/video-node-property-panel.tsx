@@ -132,13 +132,19 @@ export default function VideoNodePropertyPanel({ id, data, updateData }: VideoNo
             </div>
 
             <div className="flex flex-col">
-                <div className="text-xs text-light-900/60 font-semibold">
-                    Caption
+                <div className="flex items-center justify-between">
+                    <div className="text-xs text-light-900/60 font-semibold">
+                        Caption
+                    </div>
+                    <span className="text-[10px] text-light-900/40">
+                        {(data.caption || "").length} / 1024
+                    </span>
                 </div>
 
                 <div className="mt-2 flex">
                     <textarea
                         value={data.caption}
+                        maxLength={1024}
                         onChange={e => updateData({ caption: e.target.value })}
                         placeholder="Optional caption for the video..."
                         className="min-h-20 w-full resize-none border border-dark-200 rounded-md bg-dark-400 px-2.5 py-2 text-sm font-medium shadow-sm outline-none transition focus:(border-rose-800 bg-dark-500 ring-2 ring-rose-800/50) hover:(bg-dark-300/60) placeholder:(text-light-900/50 font-normal italic) read-only:(text-light-900/80)"
